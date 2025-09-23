@@ -3,6 +3,7 @@
 # Decompiled from: Python 3.11.5 (v3.11.5:cce6ba91b3, Aug 24 2023, 10:50:31) [Clang 13.0.0 (clang-1300.0.29.30)]
 # Embedded file name: MyFrame.pyc
 # Compiled at: 2004-02-05 21:22:02
+from __future__ import print_function
 from wxPython.wx import *
 import os, sc4Region
 from MyScrolledWindow import MyScrolledWindow
@@ -88,9 +89,9 @@ class MyFrame(wxFrame):
 
     def mnuFileOpen(self, event):
         dlg = wxDirDialog(self, 'Choose a Region Folder', self.lastRegionDir)
-        print self.simcityDir
+        print( self.simcityDir)
         if dlg.ShowModal() == wxID_OK:
-            print 'Ok'
+            print( 'Ok')
             try:
                 self.Region.Load(dlg.GetPath())
                 try:
@@ -105,10 +106,10 @@ class MyFrame(wxFrame):
                 msg.Destroy()
                 return
             else:
-                print 'Region has %d cities.' % len(self.Region.Cities)
-                self.GenerateRegionImage()
+                print( 'Region has %d cities.' % len(self.Region.Cities))
                 self.PopulateRegionTree()
                 self.PopulateRegionSummary()
+                self.GenerateRegionImage()
 
     def mnuFileSave(self, event):
         wildcard = 'PNG File (*.png)|*.png|JPG File (*.jpg)|*.jpg'
@@ -128,8 +129,8 @@ class MyFrame(wxFrame):
                 outFile = os.path.splitext(data.Filename)[0]
             dlg = wxFileDialog(self, 'Save file as...', os.getcwd(), outFile, wildcard, wxSAVE | wxOVERWRITE_PROMPT)
             if dlg.ShowModal() == wxID_OK:
-                print 'Path:', dlg.GetPath()
-                print self.jpgQuality
+                print( 'Path:', dlg.GetPath())
+                print( self.jpgQuality)
                 outImg.save(dlg.GetPath(), quality=self.jpgQuality)
             dlg.Destroy()
         else:
@@ -139,12 +140,12 @@ class MyFrame(wxFrame):
         return
 
     def mnuFileExit(self, event):
-        print 'File Exit!'
+        print( 'File Exit!')
         self.Close()
 
     def __set_properties(self):
         self.SetTitle('Region Census')
-        self.SetSize((850, 637))
+        self.SetSize((1200, 800))
         self.checkbox_shrink.SetToolTipString('If the image is larger than the current view this option will make it fit.  It will not expand an image to fit to width.')
         self.checkbox_shrink.SetValue(1)
         self.checkbox_borders.SetToolTipString('An option to show city tile borders.')
@@ -179,25 +180,25 @@ class MyFrame(wxFrame):
         self.notebook_city_info.SetSizer(sizer_5)
         sizer_5.Fit(self.notebook_city_info)
         sizer_5.SetSizeHints(self.notebook_city_info)
-        sizer_6.Add(10, 6, 0, 0, 0)
+        sizer_6.Add((10, 6), 0, 0, 0)
         sizer_15.Add(self.checkbox_shrink, 0, 0, 0)
-        sizer_15.Add(10, 5, 0, 0, 0)
+        sizer_15.Add((10, 5), 0, 0, 0)
         sizer_15.Add(self.checkbox_borders, 0, 0, 0)
-        sizer_15.Add(20, 5, 0, 0, 0)
+        sizer_15.Add((20, 5), 0, 0, 0)
         sizer_15.Add(self.checkbox_traffic, 0, 0, 0)
         sizer_7.Add(sizer_15, 0, wxEXPAND, 0)
-        sizer_7.Add(20, 20, 0, 0, 0)
+        sizer_7.Add((20, 20), 0, 0, 0)
         sizer_8.Add(self.checkbox_cityNames, 0, 0, 0)
-        sizer_8.Add(20, 5, 0, 0, 0)
+        sizer_8.Add((20, 5), 0, 0, 0)
         sizer_8.Add(self.checkbox_mayorNames, 0, 0, 0)
-        sizer_8.Add(20, 5, 0, 0, 0)
+        sizer_8.Add((20, 5), 0, 0, 0)
         sizer_8.Add(self.checkbox_fillEmpty, 0, 0, 0)
         sizer_7.Add(sizer_8, 0, wxEXPAND, 0)
-        sizer_7.Add(20, 20, 0, 0, 0)
+        sizer_7.Add((20, 20), 0, 0, 0)
         sizer_7.Add(self.button_zoom1to1, 0, wxALIGN_CENTER_VERTICAL, 0)
-        sizer_7.Add(20, 20, 0, 0, 0)
+        sizer_7.Add((20, 20), 0, 0, 0)
         sizer_7.Add(self.button_zoomOut, 0, wxALIGN_CENTER_VERTICAL, 0)
-        sizer_7.Add(20, 20, 0, 0, 0)
+        sizer_7.Add((20, 20), 0, 0, 0)
         sizer_7.Add(self.button_zoomIn, 0, wxALIGN_CENTER_VERTICAL, 0)
         sizer_6.Add(sizer_7, 0, wxEXPAND, 0)
         sizer_6.Add(self.panel_image, 1, wxEXPAND, 0)
@@ -208,7 +209,7 @@ class MyFrame(wxFrame):
         self.notebook.AddPage(self.notebook_region_info, 'Region Info')
         self.notebook.AddPage(self.notebook_city_info, 'City Info')
         self.notebook.AddPage(self.notebook_image, 'Image')
-        sizer_3.Add(wxNotebookSizer(self.notebook), 1, wxEXPAND, 0)
+        sizer_3.Add(self.notebook, 1, wxEXPAND, 0)
         self.splitter_pane_notebook.SetAutoLayout(1)
         self.splitter_pane_notebook.SetSizer(sizer_3)
         sizer_3.Fit(self.splitter_pane_notebook)
@@ -220,10 +221,10 @@ class MyFrame(wxFrame):
         self.splitter.SetSashPosition(self.splitter.GetSashPosition())
 
     def onTreeSelChanged(self, event):
-        print 'Tree selection Changed!'
+        print( 'Tree selection Changed!')
         i = event.GetItem()
-        print '%s' % self.tree_region.GetItemText(i)
-        print '%s' % self.tree_region.GetPyData(i)
+        print( '%s' % self.tree_region.GetItemText(i))
+        print( '%s' % self.tree_region.GetPyData(i))
         self.PopulateCityInfo(self.tree_region.GetPyData(i))
         self.PopulateImage(self.tree_region.GetPyData(i), self.panel_image.zoom)
 
@@ -247,14 +248,14 @@ class MyFrame(wxFrame):
         if self.Region and self.Region.RegionLoaded:
             i = self.tree_region.GetSelection()
             self.GenerateRegionImage()
-            print 'selection:', i
-            print self.tree_region.GetPyData(i)
+            print( 'selection:', i)
+            print( self.tree_region.GetPyData(i))
             if i:
                 self.PopulateImage(self.tree_region.GetPyData(i), self.panel_image.zoom)
 
     def onButtonZoomIn(self, event):
-        print 'Zoom In!'
-        print self.panel_image.zoom
+        print( 'Zoom In!')
+        print( self.panel_image.zoom)
         zoom = self.panel_image.zoom + 0.2
         if zoom > 4:
             zoom = 4
@@ -359,17 +360,17 @@ class MyFrame(wxFrame):
                 cityBMP = city.cityPNG.convert('RGB')
         else:
             cityBMP = self.Region.RegionPNG.convert('RGB')
-        print 'Populate image', cityBMP
+        print( 'Populate image', cityBMP)
         img = wxEmptyImage(cityBMP.size[0], cityBMP.size[1])
-        img.SetData(cityBMP.tostring())
+        img.SetData(cityBMP.tobytes())
         self.panel_image.SetBuffer(img, zoom)
 
     def GenerateRegionImage(self):
-        print 'GenerateRegionImage'
+        print( 'GenerateRegionImage')
         if self.Region:
-            print self.Region.RegionPNG
+            print( self.Region.RegionPNG)
             self.Region.GenerateRegionImage(traffic=self.checkbox_traffic.IsChecked(), borders=self.checkbox_borders.IsChecked(), cityNames=self.checkbox_cityNames.IsChecked(), mayorNames=self.checkbox_mayorNames.IsChecked(), fillEmptyTiles=self.checkbox_fillEmpty.IsChecked())
-            print 'End GenerateRegionImage'
+            print( 'End GenerateRegionImage')
             i = self.tree_region.GetSelection()
             self.PopulateImage(self.tree_region.GetPyData(i), self.panel_image.zoom)
 
@@ -431,8 +432,8 @@ class MyFrame(wxFrame):
                 outFile = ('').join([self.Region.RegionName, '_thumb'])
                 saveDlg = wxFileDialog(self, 'Save file as...', os.getcwd(), outFile, wildcard, wxSAVE | wxOVERWRITE_PROMPT)
                 if saveDlg.ShowModal() == wxID_OK:
-                    print 'Path:', saveDlg.GetPath()
-                    print self.jpgQuality
+                    print( 'Path:', saveDlg.GetPath())
+                    print( self.jpgQuality)
                     outImg = self.Region.RegionPNG.copy()
                     outImg.thumbnail((dlg.outW, dlg.outH), Image.ANTIALIAS)
                     outImg.save(saveDlg.GetPath(), quality=self.jpgQuality)
@@ -453,13 +454,13 @@ class MyFrame(wxFrame):
             config.set('options', 'jpgQuality', '75')
             config.set('options', 'thumbnailWidth', '700')
             config.set('options', 'hideEmptyCities', '0')
-            config.read('RegionCensus.ini')
+            config.read('regioncensus.ini')
             self.simcityDir = config.get('options', 'simcityDir')
             self.lastRegionDir = config.get('options', 'lastregionDir')
             self.jpgQuality = config.getint('options', 'jpgQuality')
             self.thumbnailWidth = config.getint('options', 'thumbnailWidth')
             self.hideEmptyCities = config.getboolean('options', 'hideEmptyCities')
-            print 'Config read:', self.simcityDir
+            print( 'Config read:', self.simcityDir)
             self.checkSimcity_1Dat()
             self.SavePrefs()
         except ConfigParser.Error, e:

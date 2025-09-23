@@ -3,6 +3,7 @@
 # Decompiled from: Python 3.11.5 (v3.11.5:cce6ba91b3, Aug 24 2023, 10:50:31) [Clang 13.0.0 (clang-1300.0.29.30)]
 # Embedded file name: sc4Dat.pyc
 # Compiled at: 2004-01-25 21:38:17
+from __future__ import print_function
 from struct import *
 import cStringIO
 from array import array
@@ -186,8 +187,8 @@ class sc4Dat:
 
             outdata = outbuf.tostring()
             if len(outdata) != uncompSize:
-                print 'Warning!  Uncompressed size incorrect!'
-                print 'Should be %d, was %d' % uncompSize, len(outbuf.tostring())
+                print( 'Warning!  Uncompressed size incorrect!')
+                print( 'Should be %d, was %d' % uncompSize, len(outbuf.tobytes()))
             return outdata
 
     def __del__(self):
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     t = sc4Dat('City - One.sc4')
     shell.clear()
     data = t.getDecompressedData(_RegionViewTGI[0], _RegionViewTGI[1], _RegionViewTGI[2])
-    print len(data)
+    print( len(data))
     fh = file('outpos', 'wb')
     fh.write(data)
     fh.close()

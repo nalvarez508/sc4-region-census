@@ -3,6 +3,7 @@
 # Decompiled from: Python 3.11.5 (v3.11.5:cce6ba91b3, Aug 24 2023, 10:50:31) [Clang 13.0.0 (clang-1300.0.29.30)]
 # Embedded file name: MyScrolledWindow.pyc
 # Compiled at: 2004-02-05 21:48:37
+from __future__ import print_function
 from wxPython.wx import *
 
 class MyScrolledWindow(wxScrolledWindow):
@@ -38,7 +39,7 @@ class MyScrolledWindow(wxScrolledWindow):
             self.zoom = 1
         elif zoomLevel == 0:
             (sizeX, sizeY) = self.GetClientSizeTuple()
-            print sizeX, sizeY
+            print( sizeX, sizeY)
             if sizeX < img.GetWidth():
                 self.zoom = 0
                 newY = int(img.GetHeight() * (float(sizeX) / img.GetWidth()))
@@ -52,13 +53,13 @@ class MyScrolledWindow(wxScrolledWindow):
             if newX > 0 and newY > 0:
                 self.buffer = wxBitmapFromImage(img.Scale(int(img.GetWidth() * zoomLevel), int(img.GetHeight() * zoomLevel)))
                 self.zoom = zoomLevel
-        print 'Buffer size:', self.buffer.GetWidth(), self.buffer.GetHeight()
+        print( 'Buffer size:', self.buffer.GetWidth(), self.buffer.GetHeight())
         (posX, posY) = self.GetViewStart()
         (sizeX, sizeY) = (self.buffer.GetWidth(), self.buffer.GetHeight())
         self.SetScrollbars(1, 1, sizeX, sizeY, posX, posY)
         self.Refresh(refresh)
 
     def OnResize(self, event):
-        print self.GetViewStart()
+        print( self.GetViewStart())
         if self.zoom == 0:
-            self.SetBuffer(self.OriginalBuffer, self.zoom, refresh=false)
+            self.SetBuffer(self.OriginalBuffer, self.zoom, refresh=False)

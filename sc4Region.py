@@ -3,7 +3,9 @@
 # Decompiled from: Python 3.11.5 (v3.11.5:cce6ba91b3, Aug 24 2023, 10:50:31) [Clang 13.0.0 (clang-1300.0.29.30)]
 # Embedded file name: sc4Region.pyc
 # Compiled at: 2004-02-06 09:33:30
-import cStringIO, sc4Dat, glob, os, Image, ImageDraw, ImageFont, PngImagePlugin, JpegImagePlugin, BmpImagePlugin, copy, ConfigParser
+from __future__ import print_function
+import cStringIO, sc4Dat, glob, os, copy, ConfigParser
+from PIL import Image, ImageDraw, ImageFont
 from struct import *
 
 class sc4City:
@@ -20,7 +22,7 @@ class sc4City:
         self.Residential = unpack('<L', rvFile.read(calcsize('<L')))[0]
         self.Commercial = unpack('<L', rvFile.read(calcsize('<L')))[0]
         self.Industrial = unpack('<L', rvFile.read(calcsize('<L')))[0]
-        print sc4File, self.VersionMajor, self.VersionMinor
+        print( sc4File, self.VersionMajor, self.VersionMinor)
         if self.VersionMajor == 1 and self.VersionMinor <= 9:
             rvFile.read(calcsize('<LLLLLLBBB'))
         elif self.VersionMajor == 1 and self.VersionMinor <= 10:
@@ -154,7 +156,7 @@ class sc4Region:
         bmpHeight = regionBMP.size[1]
         newbmpData = list(newRegionBMP.getdata())
         for city in self.Cities:
-            print 'Size: ', city.SizeX, city.SizeY, city.CityX, city.CityY
+            print( 'Size: ', city.SizeX, city.SizeY, city.CityX, city.CityY)
             for y in range(city.CityY, city.SizeY + city.CityY):
                 for x in range(city.CityX, city.SizeX + city.CityX):
                     if city.CityX + city.SizeX <= bmpWidth and city.CityX >= 0 and city.SizeX > 0 and city.CityY + city.SizeY <= bmpHeight and city.CityY >= 0 and city.SizeY > 0:
@@ -167,7 +169,7 @@ class sc4Region:
         emptyList = []
         if regionBMP.getbbox():
             if fillEmptyTiles and self.BlanksLoaded:
-                print 'Blank Tiles!'
+                print( 'Blank Tiles!')
                 for y in range(self.ConfigBMP.size[1]):
                     for x in range(bmpWidth):
                         (r, g, b) = bmpData[x + y * bmpWidth]
@@ -212,15 +214,15 @@ class sc4Region:
                 regionBMP.putdata(bmpData)
                 newRegionBMP.putdata(newbmpData)
         else:
-            print 'No Blank Tiles!'
+            print( 'No Blank Tiles!')
         regionBMPData = newbmpData
-        print 'Region BMP Sizes'
-        print regionBMP.size
-        print len(regionBMPData)
+        print( 'Region BMP Sizes')
+        print( regionBMP.size)
+        print( len(regionBMPData))
         fileList = list(range(len(self.Cities)))
         drawList = []
-        print len(emptyList)
-        print len(drawList)
+        print( len(emptyList))
+        print( len(drawList))
         f = 0
         while fileList or emptyList:
             tilePlaced = False
@@ -238,7 +240,7 @@ class sc4Region:
                     emptyList.remove(item)
 
             if not tilePlaced:
-                print 'Error:  No placable tile found.'
+                print( 'Error:  No placable tile found.')
                 break
 
         outPNG = Image.new('RGBA', (regionBMP.size[0] * 135 + 200, regionBMP.size[1] * 120))
@@ -292,14 +294,14 @@ class sc4Region:
     def LoadBlankTiles(self, simcity1DatLocation='c:/program files/maxis/simcity 4'):
         try:
             if self.BlanksLoaded:
-                print 'Blanks Already Loaded'
+                print( 'Blanks Already Loaded')
                 return
         except:
             pass
 
         try:
             datFile = sc4Dat.sc4Dat(os.path.join(simcity1DatLocation, 'simcity_1.dat'))
-            print 'Loading Blank Tiles...'
+            print( 'Loading Blank Tiles...')
             self.SmallLand = sc4EmptyTile(1)
             self.SmallWater = sc4EmptyTile(1)
             self.MediumLand = sc4EmptyTile(2)
@@ -330,9 +332,9 @@ class sc4Region:
                 self.LargeLand.cityMask = self.LargeLand.cityMask.resize(self.LargeLand.cityPNG.size)
             if self.LargeWater.cityPNG.size != self.LargeWater.cityMask.size:
                 self.LargeWater.cityMask = self.LargeWater.cityMask.resize(self.LargeWater.cityPNG.size)
-            print self.LargeWater.cityPNG.mode
-            print self.LargeWater.cityMask.mode
+            print( self.LargeWater.cityPNG.mode)
+            print( self.LargeWater.cityMask.mode)
             self.BlanksLoaded = True
-            print 'Done loading blank tiles!'
+            print( 'Done loading blank tiles!')
         except:
             self.BlanksLoaded = False
