@@ -1,8 +1,9 @@
 [Setup]
 AppName=Region Census
-AppVersion=0.8.1
+AppVersion=0.8.2
+PrivilegesRequired=lowest
 
-DefaultDirName={commonpf32}\Region Census
+DefaultDirName={localappdata}\Region Census
 DefaultGroupName=Region Census
 
 OutputBaseFilename=RegionCensusSetup
