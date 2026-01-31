@@ -92,26 +92,40 @@ class MyFrame(wxFrame):
         print( self.simcityDir)
         if dlg.ShowModal() == wxID_OK:
             print( 'Ok')
+            busy = None
             try:
-                self.Region.Load(dlg.GetPath())
-                try:
-                    self.lastRegionDir = os.path.split(dlg.GetPath())[0]
-                    self.SavePrefs()
-                except:
-                    pass
+                wxBeginBusyCursor()
+                busy = wxBusyInfo("Loading region...\n\nThis may take a moment.", self)
+                wxYield()
 
-            except StandardError, e:
-                msg = wxMessageDialog(self, 'Error loading region.\n%s' % e, 'Error', wxOK)
-                msg.ShowModal()
-                msg.Destroy()
-                return
-            else:
-                print( 'Region has %d cities.' % len(self.Region.Cities))
-                self.PopulateRegionTree()
-                self.PopulateRegionSummary()
-                self.GenerateRegionImage()
+                try:
+                    self.Region.Load(dlg.GetPath())
+                    try:
+                        self.lastRegionDir = os.path.split(dlg.GetPath())[0]
+                        self.SavePrefs()
+                    except:
+                        pass
+
+                except StandardError, e:
+                    msg = wxMessageDialog(self, 'Error loading region.\n%s' % e, 'Error', wxOK)
+                    msg.ShowModal()
+                    msg.Destroy()
+                    return
+                else:
+                    print( 'Region has %d cities.' % len(self.Region.Cities))
+                    self.PopulateRegionTree()
+                    self.PopulateRegionSummary()
+                    self.GenerateRegionImage()
+            finally:
+                if busy is not None:
+                    busy.Destroy()
+                if wxIsBusy():
+                    wxEndBusyCursor()
 
     def mnuFileSave(self, event):
+        import os, datetime
+        from PIL import Image
+
         wildcard = 'PNG File (*.png)|*.png|JPG File (*.jpg)|*.jpg'
         outFile = ''
         if self.Region.RegionLoaded:
@@ -120,7 +134,7 @@ class MyFrame(wxFrame):
                 data = self.tree_region.GetPyData(i)
             if data == None:
                 outImg = self.Region.RegionPNG
-                outFile = self.Region.RegionName
+                outFile = "{}-{}".format(self.Region.RegionName, datetime.datetime.now().strftime("%y%m%d"))
             else:
                 outImg = data.cityPNG
                 if self.checkbox_traffic.IsChecked():
@@ -129,9 +143,32 @@ class MyFrame(wxFrame):
                 outFile = os.path.splitext(data.Filename)[0]
             dlg = wxFileDialog(self, 'Save file as...', os.getcwd(), outFile, wildcard, wxSAVE | wxOVERWRITE_PROMPT)
             if dlg.ShowModal() == wxID_OK:
-                print( 'Path:', dlg.GetPath())
-                print( self.jpgQuality)
-                outImg.save(dlg.GetPath(), quality=self.jpgQuality)
+                busy = None
+                try:
+                    wxBeginBusyCursor()
+                    busy = wxBusyInfo("Saving image...\n\nThis may take a moment.", self)
+                    wxYield()
+
+                    path = dlg.GetPath()
+                    ext = os.path.splitext(path)[1].lower()
+                        
+                    print( 'Path:', path)
+                    print( self.jpgQuality)
+                    if ext in ('.jpg', '.jpeg'):
+                        if outImg.mode in ('RGBA', 'LA') or (outImg.mode == 'p' and 'transparency' in outImg.info):
+                            bg = Image.new('RGB', outImg.size, (255, 255, 255))
+                            bg.paste(outImg, mask=outImg.split()[-1])
+                            outImg = bg
+                        else:
+                            outImg = outImg.convert('RGB')
+                        outImg.save(path, 'JPEG', quality=int(self.jpgQuality), optimize=True)
+                    else:
+                        outImg.save(dlg.GetPath(), 'PNG')
+                finally:
+                    if busy is not None:
+                        busy.Destroy()
+                    if wxIsBusy():
+                        wxEndBusyCursor()
             dlg.Destroy()
         else:
             msg = wxMessageDialog(self, 'No region open.  Nothing to save.', 'Cannot save', wxOK | wxICON_INFORMATION)
@@ -417,7 +454,8 @@ class MyFrame(wxFrame):
             self.SavePrefs()
 
     def mnuSaveThumbnail(self, event):
-        import Image
+        import os, datetime
+        from PIL import Image
         wildcard = 'PNG File (*.png)|*.png|JPG File (*.jpg)|*.jpg'
         if self.Region.RegionLoaded:
             from MyThumbSave import MyThumbSave
@@ -429,14 +467,27 @@ class MyFrame(wxFrame):
             if dlg.ShowModal() == wxID_OK:
                 self.thumbnailWidth = dlg.outW
                 self.SavePrefs()
-                outFile = ('').join([self.Region.RegionName, '_thumb'])
+                outFile = "{}-{}_thumb".format(self.Region.RegionName, datetime.datetime.now().strftime("%y%m%d"))
                 saveDlg = wxFileDialog(self, 'Save file as...', os.getcwd(), outFile, wildcard, wxSAVE | wxOVERWRITE_PROMPT)
                 if saveDlg.ShowModal() == wxID_OK:
-                    print( 'Path:', saveDlg.GetPath())
+                    path = saveDlg.GetPath()
+                    ext = os.path.splitext(path)[1].lower()
+                    
+                    print( 'Path:', path)
                     print( self.jpgQuality)
                     outImg = self.Region.RegionPNG.copy()
                     outImg.thumbnail((dlg.outW, dlg.outH), Image.ANTIALIAS)
-                    outImg.save(saveDlg.GetPath(), quality=self.jpgQuality)
+
+                    if ext in ('.jpg', '.jpeg'):
+                        if outImg.mode in ('RGBA', 'LA') or (outImg.mode == 'p' and 'transparency' in outImg.info):
+                            bg = Image.new('RGB', outImg.size, (255, 255, 255))
+                            bg.paste(outImg, mask=outImg.split()[-1])
+                            outImg = bg
+                        else:
+                            outImg = outImg.convert('RGB')
+                        outImg.save(path, 'JPEG', quality=int(self.jpgQuality), optimize=True)
+                    else:
+                        outImg.save(saveDlg.GetPath(), 'PNG')
             saveDlg.Destroy()
             dlg.Destroy()
         else:
