@@ -283,12 +283,19 @@ class MyFrame(wxFrame):
 
     def onCheckboxRefreshImage(self, event):
         if self.Region and self.Region.RegionLoaded:
-            i = self.tree_region.GetSelection()
-            self.GenerateRegionImage()
-            print( 'selection:', i)
-            print( self.tree_region.GetPyData(i))
-            if i:
-                self.PopulateImage(self.tree_region.GetPyData(i), self.panel_image.zoom)
+            try:
+                wxBeginBusyCursor()
+                wxYield()
+
+                i = self.tree_region.GetSelection()
+                self.GenerateRegionImage()
+                print( 'selection:', i)
+                print( self.tree_region.GetPyData(i))
+                if i:
+                    self.PopulateImage(self.tree_region.GetPyData(i), self.panel_image.zoom)
+            finally:
+                if wxIsBusy():
+                    wxEndBusyCursor()
 
     def onButtonZoomIn(self, event):
         print( 'Zoom In!')
@@ -412,23 +419,31 @@ class MyFrame(wxFrame):
             self.PopulateImage(self.tree_region.GetPyData(i), self.panel_image.zoom)
 
     def SaveToCSV(self, event):
+        import datetime
         if self.Region.RegionLoaded:
-            outFile = self.Region.RegionName
+            outFile = "{}-{}".format(self.Region.RegionName, datetime.datetime.now().strftime("%y%m%d"))
             dlg = wxFileDialog(self, 'Save file as...', os.getcwd(), outFile, 'CSV File (Comma Seperated Values)|*.csv', wxSAVE | wxOVERWRITE_PROMPT)
             if dlg.ShowModal() == wxID_OK:
-                outFile = open(dlg.GetPath(), 'w')
-                outFile.write('"City Name","Mayor Name","Residential Pop.","Commercial Pop.","Industrial Pop.","Funds","Tile Size"\n')
-                for city in self.Region.Cities:
-                    if self.hideEmptyCities == True and not city.MayorName:
-                        pass
-                    else:
-                        outFile.write('"%s",' % city.CityName)
-                        outFile.write('"%s",' % city.MayorName)
-                        outFile.write('"%s",' % city.Residential)
-                        outFile.write('"%s",' % city.Commercial)
-                        outFile.write('"%s",' % city.Industrial)
-                        outFile.write('"%s",' % city.CityFunds)
-                        outFile.write('"%s"\n' % city.TileSize)
+                try:
+                    wxBeginBusyCursor()
+                    wxYield()
+
+                    outFile = open(dlg.GetPath(), 'w')
+                    outFile.write('"City Name","Mayor Name","Residential Pop.","Commercial Pop.","Industrial Pop.","Funds","Tile Size"\n')
+                    for city in self.Region.Cities:
+                        if self.hideEmptyCities == True and not city.MayorName:
+                            pass
+                        else:
+                            outFile.write('"%s",' % city.CityName)
+                            outFile.write('"%s",' % city.MayorName)
+                            outFile.write('"%s",' % city.Residential)
+                            outFile.write('"%s",' % city.Commercial)
+                            outFile.write('"%s",' % city.Industrial)
+                            outFile.write('"%s",' % city.CityFunds)
+                            outFile.write('"%s"\n' % city.TileSize)
+                finally:
+                    if wxIsBusy():
+                        wxEndBusyCursor()
 
         else:
             msg = wxMessageDialog(self, 'No region open.  Nothing to save.', 'Cannot save', wxOK | wxICON_INFORMATION)
@@ -470,24 +485,31 @@ class MyFrame(wxFrame):
                 outFile = "{}-{}_thumb".format(self.Region.RegionName, datetime.datetime.now().strftime("%y%m%d"))
                 saveDlg = wxFileDialog(self, 'Save file as...', os.getcwd(), outFile, wildcard, wxSAVE | wxOVERWRITE_PROMPT)
                 if saveDlg.ShowModal() == wxID_OK:
-                    path = saveDlg.GetPath()
-                    ext = os.path.splitext(path)[1].lower()
-                    
-                    print( 'Path:', path)
-                    print( self.jpgQuality)
-                    outImg = self.Region.RegionPNG.copy()
-                    outImg.thumbnail((dlg.outW, dlg.outH), Image.ANTIALIAS)
+                    try:
+                        wxBeginBusyCursor()
+                        wxYield()
 
-                    if ext in ('.jpg', '.jpeg'):
-                        if outImg.mode in ('RGBA', 'LA') or (outImg.mode == 'p' and 'transparency' in outImg.info):
-                            bg = Image.new('RGB', outImg.size, (255, 255, 255))
-                            bg.paste(outImg, mask=outImg.split()[-1])
-                            outImg = bg
+                        path = saveDlg.GetPath()
+                        ext = os.path.splitext(path)[1].lower()
+                        
+                        print( 'Path:', path)
+                        print( self.jpgQuality)
+                        outImg = self.Region.RegionPNG.copy()
+                        outImg.thumbnail((dlg.outW, dlg.outH), Image.ANTIALIAS)
+
+                        if ext in ('.jpg', '.jpeg'):
+                            if outImg.mode in ('RGBA', 'LA') or (outImg.mode == 'p' and 'transparency' in outImg.info):
+                                bg = Image.new('RGB', outImg.size, (255, 255, 255))
+                                bg.paste(outImg, mask=outImg.split()[-1])
+                                outImg = bg
+                            else:
+                                outImg = outImg.convert('RGB')
+                            outImg.save(path, 'JPEG', quality=int(self.jpgQuality), optimize=True)
                         else:
-                            outImg = outImg.convert('RGB')
-                        outImg.save(path, 'JPEG', quality=int(self.jpgQuality), optimize=True)
-                    else:
-                        outImg.save(saveDlg.GetPath(), 'PNG')
+                            outImg.save(saveDlg.GetPath(), 'PNG')
+                    finally:
+                        if wxIsBusy():
+                            wxEndBusyCursor()
             saveDlg.Destroy()
             dlg.Destroy()
         else:
@@ -554,5 +576,5 @@ class MyFrame(wxFrame):
     def mnuAbout(self, event):
         from MyAboutDialog import MyAboutDialog
         dlg = MyAboutDialog(self, -1, '')
-        dlg.text_about.SetValue('Region Census\n=========================\nOriginal Author:  sawtooth\nRecompiled by: panthercoffee72\nVersion: 0.8.2\n')
+        dlg.text_about.SetValue('Region Census\n=========================\nOriginal Author:  sawtooth\nRecompiled by: panthercoffee72\nVersion: 0.8.3\n')
         dlg.ShowModal()
