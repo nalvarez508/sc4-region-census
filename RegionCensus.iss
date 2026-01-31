@@ -1,6 +1,6 @@
 [Setup]
 AppName=Region Census
-AppVersion=0.8.2
+AppVersion=0.8.3
 PrivilegesRequired=lowest
 
 DefaultDirName={localappdata}\Region Census
