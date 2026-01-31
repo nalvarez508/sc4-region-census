@@ -554,5 +554,5 @@ class MyFrame(wxFrame):
     def mnuAbout(self, event):
         from MyAboutDialog import MyAboutDialog
         dlg = MyAboutDialog(self, -1, '')
-        dlg.text_about.SetValue('Region Census\n=========================\nOriginal Author:  sawtooth\nRecompiled by: panthercoffee72\nVersion: 0.8.1\n')
+        dlg.text_about.SetValue('Region Census\n=========================\nOriginal Author:  sawtooth\nRecompiled by: panthercoffee72\nVersion: 0.8.2\n')
         dlg.ShowModal()
